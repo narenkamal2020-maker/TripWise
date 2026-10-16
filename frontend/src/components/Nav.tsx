@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
-import { Compass, Map, Menu, X, Sun, Moon, BookMarked } from 'lucide-react';
+import { Compass, Map, Menu, X, Sun, Moon, BookMarked, LogIn, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
 import { getItinerary } from '@/api/itinerary';
 
 export function Nav() {
@@ -10,6 +11,7 @@ export function Nav() {
   const [tripCount, setTripCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const { toggle, isDark } = useTheme();
+  const { user } = useAuth();
 
   useEffect(() => {
     getItinerary().then((items) => setTripCount(items.length)).catch(() => {});
@@ -69,6 +71,22 @@ export function Nav() {
             </div>
             My Trip
           </NavLink>
+
+          {!user && (
+            <>
+              <NavLink to="/login" className={linkClass}>
+                <LogIn className="w-4 h-4" aria-hidden="true" />
+                Login
+              </NavLink>
+              <NavLink
+                to="/register"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-accent text-white hover:bg-accent/90 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+              >
+                <UserPlus className="w-4 h-4" aria-hidden="true" />
+                Sign Up
+              </NavLink>
+            </>
+          )}
 
           {/* Theme toggle */}
           <button
@@ -131,6 +149,18 @@ export function Nav() {
                   </span>
                 )}
               </NavLink>
+              {!user && (
+                <>
+                  <NavLink to="/login" className={linkClass} onClick={() => setOpen(false)}>
+                    <LogIn className="w-4 h-4" />
+                    Login
+                  </NavLink>
+                  <NavLink to="/register" className={linkClass} onClick={() => setOpen(false)}>
+                    <UserPlus className="w-4 h-4" />
+                    Sign Up
+                  </NavLink>
+                </>
+              )}
               <div className="pt-2 border-t border-paper-300 dark:border-forest-700 mt-1">
                 <button
                   onClick={() => { toggle(); setOpen(false); }}

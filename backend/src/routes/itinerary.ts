@@ -2,13 +2,17 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { addItinerarySchema, itineraryIdParamSchema } from '../schemas/validation';
 import * as itineraryService from '../services/itinerary';
 import * as otm from '../services/openTripMap';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 
+// All itinerary endpoints require authentication
+router.use(requireAuth);
+
 // GET /api/itinerary
-router.get('/', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const items = await itineraryService.getItinerary();
+    const items = await itineraryService.getItinerary(req.user!.userId);
     res.json({
       success: true,
       data: items,
@@ -37,7 +41,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const destination = await otm.getPlaceDetail(parsed.data.xid);
-    const item = await itineraryService.addToItinerary(destination);
+    const item = await itineraryService.addToItinerary(req.user!.userId, destination);
 
     res.status(201).json({
       success: true,
@@ -64,7 +68,7 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
       return;
     }
 
-    await itineraryService.removeFromItinerary(parsed.data.id);
+    await itineraryService.removeFromItinerary(req.user!.userId, parsed.data.id);
     res.json({ success: true, data: null });
   } catch (err) {
     next(err);

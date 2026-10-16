@@ -65,8 +65,7 @@ CREATE TABLE IF NOT EXISTS saved_places (
   CONSTRAINT unique_saved_per_user UNIQUE (user_id, xid)
 );
 
--- Ensure a default (legacy, anonymous) trip exists at id = 1
-INSERT INTO trips (id, name) VALUES (1, 'Default Trip') ON CONFLICT (id) DO NOTHING;
+-- No anonymous shared trip — all trips are user-owned
 `;
 
 async function migrate() {

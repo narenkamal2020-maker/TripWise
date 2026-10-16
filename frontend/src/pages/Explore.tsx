@@ -12,6 +12,7 @@ import { ErrorMessage } from '@/components/ErrorMessage';
 import { POPULAR_CITIES, KIND_FILTERS } from '@/data/cities';
 import { formatCoordinates } from '@/utils/formatters';
 import { useToast } from '@/context/ToastContext';
+import { useAuth } from '@/context/AuthContext';
 
 type SearchMode = 'text' | 'nearby';
 type SortOption = 'distance' | 'name' | 'rate';
@@ -30,6 +31,7 @@ const stagger = {
 export function Explore() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Initialise from URL query params
   const initialQ = searchParams.get('q') ?? '';
@@ -69,10 +71,11 @@ export function Explore() {
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
 
   useEffect(() => {
+    if (!user) return;
     getItinerary()
       .then((items) => setSavedXids(new Set(items.map((i) => i.xid))))
       .catch(() => {});
-  }, []);
+  }, [user]);
 
   const doSearch = useCallback(async (params: DestinationQuery) => {
     if (abortRef.current) abortRef.current.abort();
@@ -145,6 +148,10 @@ export function Explore() {
   };
 
   const handleAdd = async (dest: Destination) => {
+    if (!user) {
+      toast('Sign in to save destinations to your trip.', 'info');
+      return;
+    }
     if (savedXids.has(dest.id) || addingXid === dest.id) return;
     setAddingXid(dest.id);
     try {
@@ -192,7 +199,7 @@ export function Explore() {
         />
         <div className="absolute inset-0 bg-topo-dark opacity-30" />
         <div className="relative z-10">
-          <p className="text-accent font-medium tracking-widest uppercase text-xs mb-3">✦ Destination Discovery</p>
+          <p className="text-accent font-medium tracking-widest uppercase text-xs mb-3">Destination Discovery</p>
           <h1 className="font-serif text-3xl sm:text-4xl font-bold text-paper-100 leading-tight max-w-sm mb-2">
             Where will you <em className="text-accent not-italic">go next?</em>
           </h1>
@@ -291,7 +298,7 @@ export function Explore() {
                 <MapPin className="w-5 h-5 text-ink-400 dark:text-forest-400" aria-hidden="true" />
                 {selectedCity ? (
                   <span className="text-ink-900 dark:text-paper-100 font-medium">
-                    {selectedCity.emoji} {selectedCity.name}, {selectedCity.country}
+                    {selectedCity.name}, {selectedCity.country}
                   </span>
                 ) : (
                   <span className="text-ink-400 dark:text-forest-400">Select a city to explore nearby…</span>
@@ -326,7 +333,6 @@ export function Explore() {
                             : 'text-ink-700 dark:text-forest-100 hover:bg-paper-100 dark:hover:bg-forest-700'
                         }`}
                       >
-                        <span className="text-base">{city.emoji}</span>
                         <span>{city.name}</span>
                         <span className="text-ink-300 dark:text-forest-500 text-xs ml-auto">{city.country}</span>
                       </button>

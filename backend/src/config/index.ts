@@ -9,7 +9,7 @@ const configSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   OPENTRIPMAP_API_KEY: z.string().min(1, 'OPENTRIPMAP_API_KEY is required'),
   FRONTEND_ORIGIN: z.string().url().default('http://localhost:5173'),
-  JWT_SECRET: z.string().min(32).default('change-me-to-a-strong-random-secret-at-least-32-chars'),
+  JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('7d'),
 });
 

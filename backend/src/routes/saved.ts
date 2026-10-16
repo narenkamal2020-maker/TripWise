@@ -46,16 +46,25 @@ router.post('/', async (req, res) => {
 });
 
 /* DELETE /api/saved/:xid */
-router.delete('/:xid', async (req, res) => {
-  const result = await pool.query(
-    'DELETE FROM saved_places WHERE user_id = $1 AND xid = $2',
-    [req.user!.userId, req.params.xid],
-  );
-  if (!result.rowCount) {
-    res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Saved place not found.' } });
-    return;
+router.delete('/:xid', async (req, res, next) => {
+  try {
+    const xidParse = z.string().min(1).max(64).regex(/^[A-Za-z0-9_]+$/).safeParse(req.params.xid);
+    if (!xidParse.success) {
+      res.status(400).json({ success: false, error: { code: 'VALIDATION', message: 'Invalid xid.' } });
+      return;
+    }
+    const result = await pool.query(
+      'DELETE FROM saved_places WHERE user_id = $1 AND xid = $2',
+      [req.user!.userId, xidParse.data],
+    );
+    if (!result.rowCount) {
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Saved place not found.' } });
+      return;
+    }
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
   }
-  res.json({ success: true });
 });
 
 export default router;

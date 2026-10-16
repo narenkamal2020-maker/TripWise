@@ -43,7 +43,7 @@ function AnimatedRoutes() {
         <Route path="/" element={<Layout />}>
           <Route path="explore" element={<Explore />} />
           <Route path="destinations/:xid" element={<DestinationDetail />} />
-          <Route path="my-trip" element={<MyTrip />} />
+          <Route path="my-trip" element={<ProtectedRoute><MyTrip /></ProtectedRoute>} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="terms" element={<Terms />} />
         </Route>

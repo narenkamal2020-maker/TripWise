@@ -60,5 +60,4 @@ export interface City {
   country: string;
   lat: number;
   lon: number;
-  emoji: string;
 }
